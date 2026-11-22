@@ -1,36 +1,47 @@
-# FixMate Server (Backend)
+<div align="center">
 
-FixMate is an on-demand Smart Device & Home Appliance Repair Service platform.
-This repository contains the **Express + MongoDB API server**. The Next.js +
-BetterAuth client lives in a separate repository.
+# ⚙️ FixMate Server (Backend)
+
+**Express + MongoDB REST API for the FixMate repair booking platform**
+
+[Live API](https://fixmate-server-two.vercel.app) · [Health Check](https://fixmate-server-two.vercel.app/api/health) · [Frontend Repo](https://github.com/masudmoon695-alt/Fixmate-client) · [Live Site](https://fixmate-client-alpha.vercel.app)
+
+</div>
+
+---
+
+FixMate is an on-demand Smart Device & Home Appliance Repair Service platform. This repository contains the **Express + MongoDB API server**. The Next.js + BetterAuth client lives in a [separate repository](https://github.com/masudmoon695-alt/Fixmate-client).
 
 - **Base path:** everything under `/api`
 - **Health check:** `GET /api/health`
 - **Entry:** `server.js` → `src/app.js`
+- **Deployed on:** Vercel (serverless, `api/` entry + `vercel.json`)
 
----
-
-## Stack
+## 🧰 Stack
 
 | Area | Technology |
 |---|---|
 | Runtime | Node.js (>= 20) |
 | Framework | Express.js |
-| Database | MongoDB (official `mongodb` driver, cached + serverless-safe client) |
-| Auth | JWT (BetterAuth issues tokens, server verifies with `JWT_SECRET`) |
+| Database | MongoDB (official `mongodb` driver, cached and serverless-safe client) |
+| Auth | JWT (BetterAuth issues tokens, the server verifies them with `JWT_SECRET`) |
 | Payment | Stripe Checkout + Webhook (test mode only) |
 | Media | ImgBB (client uploads, server stores URLs) |
+| Deployment | Vercel |
 
-## Getting started
+## 🚀 Getting Started
 
 ```bash
-cd server
+git clone https://github.com/masudmoon695-alt/Fixmate-server.git
+cd Fixmate-server
 cp .env.example .env
 npm install
 npm run dev
 ```
 
-### Environment variables
+The API runs at `http://localhost:5000`.
+
+### Environment Variables
 
 ```env
 PORT=5000
@@ -44,20 +55,27 @@ STRIPE_WEBHOOK_SECRET=
 IMGBB_API_KEY=
 ```
 
-`STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` belong to **Stripe test mode only**.
-Register the production webhook endpoint for the deployed server and put its
-signing secret in `STRIPE_WEBHOOK_SECRET`.
+> `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` belong to **Stripe test mode only**. Register the production webhook endpoint for the deployed server and put its signing secret in `STRIPE_WEBHOOK_SECRET`.
 
-## API overview
+### Scripts
+
+| Command | Description |
+|---|---|
+| `npm start` | Start the API |
+| `npm run dev` | Start with `node --watch` |
+| `npm run seed` | Seed / upsert demo data (admin, technicians, customers, services, bookings, payments) |
+
+## 📡 API Overview
 
 ### Public
 
 | Method | Path | Notes |
 |---|---|---|
-| GET | `/api/services` | search / category / serviceMode / sort / limit / page |
-| GET | `/api/services/:id` | public only; 404 unless approved + available |
+| GET | `/api/health` | Health check |
+| GET | `/api/services` | `search`, `category`, `serviceMode`, `sort`, `limit`, `page` |
+| GET | `/api/services/:id` | Public only; `404` unless approved and available |
 
-### Auth & profile
+### Auth & Profile
 
 | Method | Path | Middlewares |
 |---|---|---|
@@ -67,12 +85,12 @@ signing secret in `STRIPE_WEBHOOK_SECRET`.
 
 | Method | Path | Middlewares | Notes |
 |---|---|---|---|
-| POST | `/api/bookings` | `verifyToken`, `verifyCustomer` | duplicate active → `409` |
+| POST | `/api/bookings` | `verifyToken`, `verifyCustomer` | Duplicate active booking → `409` |
 | GET | `/api/bookings/my` | `verifyToken`, `verifyCustomer` | |
-| GET | `/api/bookings/stats` | `verifyToken`, `verifyCustomer` | dashboard |
+| GET | `/api/bookings/stats` | `verifyToken`, `verifyCustomer` | Dashboard stats |
 | GET | `/api/bookings/technician` | `verifyToken`, `verifyTechnician` | |
-| PATCH | `/api/bookings/:id/cancel` | `verifyToken`, `verifyCustomer` | from `requested` only |
-| PATCH | `/api/bookings/:id/status` | `verifyToken`, `verifyTechnician` | statusRules only |
+| PATCH | `/api/bookings/:id/cancel` | `verifyToken`, `verifyCustomer` | From `requested` only |
+| PATCH | `/api/bookings/:id/status` | `verifyToken`, `verifyTechnician` | Allowed transitions only |
 
 ### Services
 
@@ -81,7 +99,7 @@ signing secret in `STRIPE_WEBHOOK_SECRET`.
 | POST | `/api/services` | `verifyToken`, `verifyTechnician` |
 | GET | `/api/services/my` | `verifyToken`, `verifyTechnician` |
 | GET | `/api/services/stats` | `verifyToken`, `verifyTechnician` |
-| PATCH | `/api/services/:id` | `verifyToken`, `verifyTechnician` → back to `pending` |
+| PATCH | `/api/services/:id` | `verifyToken`, `verifyTechnician` (goes back to `pending`) |
 | DELETE | `/api/services/:id` | `verifyToken`, `verifyTechnician` (own only) |
 | PATCH | `/api/services/:id/availability` | `verifyToken`, `verifyTechnician` |
 
@@ -89,11 +107,11 @@ signing secret in `STRIPE_WEBHOOK_SECRET`.
 
 | Method | Path | Notes |
 |---|---|---|
-| POST | `/api/payments/create-checkout-session` | customer, completed + unpaid booking |
-| GET | `/api/payments/verify` | session retrieval + idempotent save |
-| GET | `/api/payments/my` | customer history |
-| GET | `/api/payments/stats` | customer totals |
-| POST | `/api/payments/webhook` | public, raw body + Stripe signature |
+| POST | `/api/payments/create-checkout-session` | Customer, completed and unpaid booking |
+| GET | `/api/payments/verify` | Session retrieval and idempotent save |
+| GET | `/api/payments/my` | Customer payment history |
+| GET | `/api/payments/stats` | Customer totals |
+| POST | `/api/payments/webhook` | Public, raw body and Stripe signature |
 
 ### Admin
 
@@ -107,41 +125,48 @@ signing secret in `STRIPE_WEBHOOK_SECRET`.
 | GET | `/api/admin/payments` | admin |
 | GET | `/api/admin/stats` | admin |
 
----
+## 🔒 Rules Enforced by the Server
 
-## Rules enforced by the server
-
-- `401` unauthenticated / `403` wrong role or ownership / `400` validation /
-  `404` missing / `409` conflict — never mixed up.
-- Role is always read from the DB, never from the token or the client.
-- Only approved + available services are public; `GET /api/services/:id` → `404` otherwise.
-- A technician edits a service → back to `approvalStatus: 'pending'`.
+- `401` unauthenticated, `403` wrong role or ownership, `400` validation, `404` missing, `409` conflict. These are never mixed up.
+- The role is always read from the database, never from the token or the client.
+- Only approved and available services are public; `GET /api/services/:id` returns `404` otherwise.
+- When a technician edits a service, it goes back to `approvalStatus: 'pending'`.
 - No two active bookings per customer per service → `409 "You already have an active request for this service"`.
-- `preferredDate` must be today or future, `problemDescription` ≥ 20 chars.
-- Technician transitions: `requested → accepted|rejected`, `accepted → in-progress`,
-  `in-progress → completed` (with `finalAmount > 0`). Any other transition → `400`.
-- Payment: pay-after-service; amount always recomputed from the server-side booking.
+- `preferredDate` must be today or a future date, and `problemDescription` must be at least 20 characters.
+- Technician status transitions:
+  `requested → accepted | rejected`, `accepted → in-progress`, `in-progress → completed` (with `finalAmount > 0`). Any other transition returns `400`.
+- Payment is pay-after-service; the amount is always recomputed from the server-side booking.
 
-## Seed
+## 📁 Project Structure
 
-```bash
-npm run seed
+```
+Fixmate-server/
+├── api/              # Vercel serverless entry
+├── src/              # Express app, routes, controllers, middlewares
+├── server.js         # Local entry point (app.listen)
+├── vercel.json       # Vercel routing config
+├── .env.example      # Environment variable template
+└── agent.md          # AI agent rules for this project
 ```
 
-Upserts admin / technicians / customers / services / bookings / payments.
+## ☁️ Deployment (Vercel)
 
-## Scripts
+- [ ] `MONGODB_URI`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `IMGBB_API_KEY` set in the Vercel dashboard
+- [ ] `CLIENT_URL` set to `https://fixmate-client-alpha.vercel.app` (CORS allows localhost and the deployed client)
+- [ ] Stripe webhook endpoint registered: `https://fixmate-server-two.vercel.app/api/payments/webhook` (test mode)
+- [ ] `GET /` and `GET /api/health` return OK
+- [ ] MongoDB Atlas Network Access allows the host (`0.0.0.0/0` for Vercel)
+- [ ] Redeploy after changing any environment variable
 
-| Command | Description |
+## 🔗 Related
+
+| | URL |
 |---|---|
-| `npm start` | Start the API |
-| `npm run dev` | Start with `node --watch` |
-| `npm run seed` | Seed / upsert demo data |
+| Frontend repo | https://github.com/masudmoon695-alt/Fixmate-client |
+| Live site | https://fixmate-client-alpha.vercel.app |
+| Live API | https://fixmate-server-two.vercel.app |
 
-## Deployment checklist
+## 👨‍💻 Author
 
-- [ ] `MONGODB_URI`, `JWT_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` set on host.
-- [ ] CORS allows localhost + the deployed client domain.
-- [ ] Stripe webhook endpoint registered (test mode).
-- [ ] `GET /` and `GET /api/health` return OK.
-- [ ] MongoDB Atlas network access allows the host.
+**Masud**
+- GitHub: [@masudmoon695-alt](https://github.com/masudmoon695-alt)
